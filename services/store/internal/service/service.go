@@ -12,10 +12,10 @@ type StoreOrder interface {
 }
 
 type Product interface {
-	Create(so model.Product) (int, error)
-	GetById(id int) (model.Product, error)
+	Create(so model.StoreProduct) (int, error)
+	GetById(id int) (model.StoreProduct, error)
 	Delete(id int) error
-	Update(id int, input model.Product) error
+	Update(id int, input model.StoreProduct) error
 }
 
 type Service struct {

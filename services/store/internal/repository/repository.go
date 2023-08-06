@@ -12,21 +12,22 @@ type StoreOrder interface {
 	DeleteByOrderId(id int) error
 }
 
-type Product interface {
-	Create(order model.Product) (int, error)
-	GetById(id int) (model.Product, error)
+type StoreProduct interface {
+	Create(order model.StoreProduct) (int, error)
+	GetById(id int) (model.StoreProduct, error)
+	GetByProductId(id int) (model.StoreProduct, error)
 	Delete(id int) error
-	Update(ind int, input model.Product) error
+	Update(ind int, input model.StoreProduct) error
 }
 
 type Repository struct {
 	StoreOrder
-	Product
+	StoreProduct
 }
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
-		StoreOrder: NewStoreOrderPostgres(db),
-		Product:    NewProductPostgres(db),
+		StoreOrder:   NewStoreOrderPostgres(db),
+		StoreProduct: NewProductPostgres(db),
 	}
 }

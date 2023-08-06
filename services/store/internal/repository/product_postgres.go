@@ -15,7 +15,7 @@ func NewProductPostgres(db *gorm.DB) *ProductPostgres {
 	return &ProductPostgres{db: db}
 }
 
-func (r *ProductPostgres) Create(sp model.Product) (int, error) {
+func (r *ProductPostgres) Create(sp model.StoreProduct) (int, error) {
 	result := r.db.Create(&sp)
 	if result.Error != nil {
 		return 0, result.Error
@@ -23,27 +23,33 @@ func (r *ProductPostgres) Create(sp model.Product) (int, error) {
 	return sp.ID, nil
 }
 
-func (r *ProductPostgres) GetById(id int) (model.Product, error) {
-	var product model.Product
+func (r *ProductPostgres) GetById(id int) (model.StoreProduct, error) {
+	var product model.StoreProduct
 	result := r.db.First(&product, "id = ?", id)
 	return product, result.Error
 }
 
+func (r *ProductPostgres) GetByProductId(id int) (model.StoreProduct, error) {
+	var product model.StoreProduct
+	result := r.db.First(&product, "product_id = ?", id)
+	return product, result.Error
+}
+
 func (r *ProductPostgres) Delete(id int) error {
-	result := r.db.Delete(&model.Product{}, "id = ?", id)
+	result := r.db.Delete(&model.StoreProduct{}, "id = ?", id)
 	return result.Error
 }
 
-func (r *ProductPostgres) Update(id int, input model.Product) error {
-	var updatedProduct model.Product
+func (r *ProductPostgres) Update(id int, input model.StoreProduct) error {
+	var updatedProduct model.StoreProduct
 	result := r.db.First(&updatedProduct, "id = ?", id)
 	if result.Error != nil {
 		return result.Error
 	}
 	now := time.Now()
-	productToUpdate := model.Product{
+	productToUpdate := model.StoreProduct{
 		InStock:    input.InStock,
-		Price:      input.Price,
+		ProductId:  input.ProductId,
 		CreatedAt:  updatedProduct.CreatedAt,
 		ModifiedAt: now,
 	}

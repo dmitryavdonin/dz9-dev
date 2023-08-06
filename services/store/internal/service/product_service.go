@@ -13,11 +13,11 @@ func NewProductService(repo repository.Product) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) Create(input model.Product) (int, error) {
+func (s *ProductService) Create(input model.StoreProduct) (int, error) {
 	return s.repo.Create(input)
 }
 
-func (s *ProductService) GetById(id int) (model.Product, error) {
+func (s *ProductService) GetById(id int) (model.StoreProduct, error) {
 	return s.repo.GetById(id)
 }
 
@@ -25,6 +25,6 @@ func (s *ProductService) Delete(id int) error {
 	return s.repo.Delete(id)
 }
 
-func (s *ProductService) Update(id int, input model.Product) error {
+func (s *ProductService) Update(id int, input model.StoreProduct) error {
 	return s.repo.Update(id, input)
 }

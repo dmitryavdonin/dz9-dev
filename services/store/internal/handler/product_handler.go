@@ -11,13 +11,13 @@ import (
 )
 
 func (h *Handler) createProduct(c *gin.Context) {
-	var input model.Product
+	var input model.StoreProduct
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	item := model.Product{
+	item := model.StoreProduct{
 		InStock:    input.InStock,
 		Price:      input.Price,
 		CreatedAt:  time.Now(),
@@ -36,7 +36,7 @@ func (h *Handler) createProduct(c *gin.Context) {
 }
 
 func (h *Handler) updateProduct(c *gin.Context) {
-	var input model.Product
+	var input model.StoreProduct
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -44,7 +44,7 @@ func (h *Handler) updateProduct(c *gin.Context) {
 
 	id_str := c.Param("id")
 
-	item := model.Product{
+	item := model.StoreProduct{
 		InStock:    input.InStock,
 		Price:      input.Price,
 		ModifiedAt: time.Now(),
