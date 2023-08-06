@@ -1,0 +1,643 @@
+{
+	"info": {
+		"_postman_id": "caed6513-d1b9-4355-8441-739b1d77d3bc",
+		"name": "dz9-dev",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "795865",
+		"_collection_link": "https://otus-dmitryavdonin.postman.co/workspace/otus~82993246-0f01-4d25-adef-9e5b9e2d034b/collection/795865-caed6513-d1b9-4355-8441-739b1d77d3bc?action=share&creator=795865&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Создать заказ 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Создать заказ 1\", function () {\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"orderId1\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product1}},\r\n  \"quantity\": {{quantity1}},\r\n  \"price\": {{price1}},\r\n  \"delivery_address\": {{delivery_address1}},\r\n  \"delivery_date\": {{delivery_date1}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить параметры заказа 1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{orderId1}}",
+							"description": "Order ID (required)"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Удалить заказ 1",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{orderId1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить параметры заказа со склада",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl1}}/store/order/:id",
+					"host": [
+						"{{baseUrl1}}"
+					],
+					"path": [
+						"store",
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Разместить на складе продукт 1",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"product_id\": {{product1_id}},\r\n  \"in_stock\": {{product1_instock}},\r\n  \"price\": {{product1_price}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "javascript"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/product/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"product",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавить книгу 1 в продажу",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Добавить книгу 1 в продажу\", function () {\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"book1_id\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": {{title1}},\r\n  \"author\": {{author1}},\r\n  \"price\": {{price1}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlBook}}/book/",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавить пользователя 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Добавить книгу 1 в продажу\", function () {\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"user1_id\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": {{username1}},\r\n  \"balance\": {{balance1}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlUser}}/user/",
+					"host": [
+						"{{baseUrlUser}}"
+					],
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавить книгу 2 в продажу",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Добавить книгу 1 в продажу\", function () {\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"book2_id\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": {{title2}},\r\n  \"author\": {{author2}},\r\n  \"price\": {{price2}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlBook}}/book/",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить параметры книги 1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlBook}}/book/:id",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить параметры пользователя 1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlUser}}/user/:id",
+					"host": [
+						"{{baseUrlUser}}"
+					],
+					"path": [
+						"user",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Обновить параметры книги 1",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Patterns of Microservice Architecture\",\r\n  \"author\": {{author1}},\r\n  \"price\": 12\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlBook}}/book/:id",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Обновить параметры пользователя 1",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"fox.malder\",\r\n  \"balance\": 22\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrlUser}}/user/:id",
+					"host": [
+						"{{baseUrlUser}}"
+					],
+					"path": [
+						"user",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Удалить книгу 1 из продажи",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlBook}}/book/:id",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Удалить книгу 1 из продажи Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlUser}}/user/:id",
+					"host": [
+						"{{baseUrlUser}}"
+					],
+					"path": [
+						"user",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user1_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Удалить книгу 2 из продажи",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlBook}}/book/:id",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{book2_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить список книг в продаже",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlBook}}/book/",
+					"host": [
+						"{{baseUrlBook}}"
+					],
+					"path": [
+						"book",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получить список пользователей",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrlUser}}/user/",
+					"host": [
+						"{{baseUrlUser}}"
+					],
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://arch.homework:8000",
+			"type": "string"
+		},
+		{
+			"key": "product1",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "quantity1",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "price1",
+			"value": "5",
+			"type": "string"
+		},
+		{
+			"key": "delivery_address1",
+			"value": "\"Moscow, Shabolovka, 13\"",
+			"type": "string"
+		},
+		{
+			"key": "delivery_date1",
+			"value": "\"2023-08-23\"",
+			"type": "string"
+		},
+		{
+			"key": "orderId1",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "baseUrl1",
+			"value": "http://arch.homework:8001",
+			"type": "string"
+		},
+		{
+			"key": "product1_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "product1_instock",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "product1_price",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "title1",
+			"value": "\"Microservice Architecture\"",
+			"type": "string"
+		},
+		{
+			"key": "author1",
+			"value": "\"Chris Richardson\"",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlBook",
+			"value": "http://arch.homework:8002",
+			"type": "string"
+		},
+		{
+			"key": "book1_id",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "book2_id",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "title2",
+			"value": "\"C for dummies\"",
+			"type": "string"
+		},
+		{
+			"key": "author2",
+			"value": "\"R. Davis\"",
+			"type": "string"
+		},
+		{
+			"key": "price2",
+			"value": "8",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlUser",
+			"value": "http://arch.homework:8003",
+			"type": "string"
+		},
+		{
+			"key": "username1",
+			"value": "\"i.petrov\"",
+			"type": "string"
+		},
+		{
+			"key": "balance1",
+			"value": "15",
+			"type": "string"
+		},
+		{
+			"key": "user1_id",
+			"value": "0",
+			"type": "string"
+		}
+	]
+}
