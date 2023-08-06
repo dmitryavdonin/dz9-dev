@@ -1,0 +1,11 @@
+port: "8000"
+
+db:
+    username: "postgres"
+    host: "localhost"
+    port: "5432"
+    dbname: "postgres"
+    password: "manager"
+
+kafka:
+    ORDER_CREATED_TOPIC: order_created_v1
