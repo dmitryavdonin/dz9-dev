@@ -1,5 +1,6 @@
 package handler
 
-type statusResponse struct {
+type StatusResponse struct {
 	Status string `json:"status"`
+	Reason string `json:"reason"`
 }

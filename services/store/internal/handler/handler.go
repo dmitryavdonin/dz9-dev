@@ -20,16 +20,19 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	order_api := router.Group("/store/order")
 	{
 		order_api.POST("/", h.createStoreOrder)
-		order_api.GET("/:id", h.getStoreOrderByOrderId)
-		order_api.DELETE("/:id", h.deleteStoreOrderByOrderId)
+		order_api.POST("/cancel/:id", h.cancelStoreOrder)
+		order_api.GET("/", h.getAllStoreOrders)
+		order_api.GET("/:id", h.getStoreOrderById)
+		order_api.DELETE("/:id", h.deleteStoreOrder)
 	}
 
-	product_api := router.Group("/store/product")
+	product_api := router.Group("/store/book")
 	{
-		product_api.POST("/", h.createProduct)
-		product_api.GET("/:id", h.getProductById)
-		product_api.DELETE("/:id", h.deleteProduct)
-		product_api.PUT("/:id", h.updateProduct)
+		product_api.POST("/", h.createStoreBook)
+		product_api.GET("/", h.getAllStoreBooks)
+		product_api.GET("/:id", h.getStoreBookById)
+		product_api.DELETE("/:id", h.deleteStoreBook)
+		product_api.PUT("/:id", h.updateStoreBook)
 	}
 
 	return router

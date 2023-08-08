@@ -8,26 +8,30 @@ import (
 
 type StoreOrder interface {
 	Create(input model.StoreOrder) (int, error)
-	GetByOrderId(id int) (model.StoreOrder, error)
-	DeleteByOrderId(id int) error
+	GetById(id int) (model.StoreOrder, error)
+	GetAll(limit int, offset int) ([]model.StoreOrder, error)
+	Delete(id int) error
+	Update(ind int, input model.StoreOrder) error
+	AlreadyExists(id int) bool
 }
 
-type StoreProduct interface {
-	Create(order model.StoreProduct) (int, error)
-	GetById(id int) (model.StoreProduct, error)
-	GetByProductId(id int) (model.StoreProduct, error)
+type StoreBook interface {
+	Create(order model.StoreBook) (int, error)
+	GetById(id int) (model.StoreBook, error)
+	GetAll(limit int, offset int) ([]model.StoreBook, error)
 	Delete(id int) error
-	Update(ind int, input model.StoreProduct) error
+	Update(ind int, input model.StoreBook) error
+	AlreadyExists(id int) bool
 }
 
 type Repository struct {
 	StoreOrder
-	StoreProduct
+	StoreBook
 }
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
-		StoreOrder:   NewStoreOrderPostgres(db),
-		StoreProduct: NewProductPostgres(db),
+		StoreOrder: NewStoreOrderPostgres(db),
+		StoreBook:  NewStoreBookPostgres(db),
 	}
 }
