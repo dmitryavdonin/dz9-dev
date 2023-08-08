@@ -24,3 +24,7 @@ func (s *OrderService) GetById(id int) (model.Order, error) {
 func (s *OrderService) Delete(id int) error {
 	return s.repo.Delete(id)
 }
+
+func (s *OrderService) Update(id int, order model.Order) error {
+	return s.repo.Update(id, order)
+}

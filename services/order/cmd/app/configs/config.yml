@@ -9,3 +9,6 @@ db:
 
 kafka:
     ORDER_CREATED_TOPIC: order_created_v1
+
+api:
+    StoreURI: "http://arch.homework:8004/store"

@@ -54,7 +54,7 @@ func main() {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(db, viper.GetString("api.storeuri"))
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
