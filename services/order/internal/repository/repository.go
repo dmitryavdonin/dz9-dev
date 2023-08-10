@@ -13,6 +13,7 @@ import (
 type Order interface {
 	Create(order model.Order) (int, error)
 	GetById(orderId int) (model.Order, error)
+	GetAll(limit int, offset int) ([]model.Order, error)
 	Delete(orderId int) error
 	Update(orderId int, input model.Order) error
 }

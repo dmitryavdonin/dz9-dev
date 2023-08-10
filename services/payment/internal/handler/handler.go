@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"order/internal/service"
+	"payment/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,12 +17,13 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	api := router.Group("/order")
+	api := router.Group("/payment")
 	{
-		api.POST("/", h.createOrder)
-		api.GET("/:id", h.getOrderById)
-		api.GET("/", h.getAllOrders)
-		api.DELETE("/:id", h.deleteOrder)
+		api.POST("/", h.createPayment)
+		api.POST("/cancel/:id", h.cancelPayment)
+		api.GET("/:id", h.getById)
+		api.GET("/", h.getAll)
+		api.DELETE("/:id", h.deletePayment)
 
 	}
 

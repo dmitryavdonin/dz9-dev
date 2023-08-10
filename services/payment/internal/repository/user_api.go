@@ -7,41 +7,51 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"order/internal/model"
-	"order/internal/repository/store/dto"
-	"order/internal/service/adapters/store"
+	"payment/internal/model"
+	"payment/internal/repository/user/dto"
 )
 
-type StoreApi struct {
+type UserApi struct {
 	baseUrl string
 }
 
-func NewStoreApi(baseUrl string) *StoreApi {
-	return &StoreApi{baseUrl: baseUrl}
+func NewUserApi(baseUrl string) *UserApi {
+	return &UserApi{baseUrl: baseUrl}
 }
 
-func (r *StoreApi) CreateStoreOrder(ctx context.Context, storeOrder store.StoreOrderInfo) (statusResponse *model.StatusResponse, err error) {
-	request := &dto.CreateStoreOrderRequest{
-		OrderId:  storeOrder.OrderId,
-		BookId:   storeOrder.BookId,
-		Quantity: storeOrder.Quantity,
+func (r *UserApi) GetBalance(ctx context.Context, user_id int) (ub model.UserBalance, err error) {
+	request := &dto.CreateGetBalanceRequest{
+		UserId: user_id,
 	}
 
-	response := &dto.CreateStoreOrderResponse{}
+	response := &dto.CreateGetBalanceResponse{}
 
-	_, err = sendRequest(r.baseUrl+"/order", http.MethodPost, "application/json", request, response)
+	_, err = sendRequest(r.baseUrl+"/user", http.MethodGet, "application/json", request, response)
 	if err != nil {
 
-		return &model.StatusResponse{
+		return model.UserBalance{
 			Status: "failed",
 			Reason: err.Error(),
 		}, err
 	}
 
-	return &model.StatusResponse{
-		Status: response.Status,
-		Reason: response.Reason,
+	return model.UserBalance{
+		UserId:  response.UserId,
+		Balance: response.Balance,
 	}, nil
+}
+
+func (r *UserApi) UpdateBalance(ctx context.Context, ub model.UserBalance) error {
+	request := &dto.CreateUpdateBalanceRequest{
+		UserId:  ub.UserId,
+		Balance: ub.Balance,
+	}
+
+	response := &dto.CreateUpdateBalanceResponse{}
+
+	_, err := sendRequest(r.baseUrl+"/user", http.MethodPut, "application/json", request, response)
+
+	return err
 }
 
 func sendRequest(url, method, contentType string, data interface{}, response interface{}) (code int, err error) {

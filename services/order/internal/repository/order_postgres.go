@@ -30,6 +30,15 @@ func (r *OrderPostgres) GetById(orderId int) (model.Order, error) {
 	return order, result.Error
 }
 
+func (r *OrderPostgres) GetAll(limit int, offset int) ([]model.Order, error) {
+	var items []model.Order
+	result := r.db.Limit(limit).Offset(offset).Find(&items)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return items, result.Error
+}
+
 func (r *OrderPostgres) Delete(orderId int) error {
 	result := r.db.Delete(&model.Order{}, "id = ?", orderId)
 	return result.Error

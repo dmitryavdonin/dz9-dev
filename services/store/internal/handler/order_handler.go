@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// create a new order in the store
 func (h *Handler) createStoreOrder(c *gin.Context) {
 	var input model.StoreOrder
 	if err := c.BindJSON(&input); err != nil {
@@ -21,30 +21,49 @@ func (h *Handler) createStoreOrder(c *gin.Context) {
 		return
 	}
 
-	// check if store order for this order_id already exists
-	if h.service.StoreOrder.AlreadyExists(input.OrderId) {
-		c.JSON(http.StatusConflict, StatusResponse{
-			Status: "failed",
-			Reason: fmt.Sprintf("Order with id = %d already exists", input.OrderId),
-		})
-		return
-	}
-
-	storeBook, err := h.service.StoreBook.GetById(input.BookId)
+	// at first try to find the required book in the sore
+	book, err := h.service.StoreBook.GetById(input.BookId)
 	if err != nil {
-		// cannot get book in store info
-		c.JSON(http.StatusInternalServerError, StatusResponse{
+		// cannot get book in store
+		c.JSON(http.StatusNotFound, StatusResponse{
 			Status: "failed",
-			Reason: err.Error(),
+			Reason: "The required book not found",
 		})
 		return
 	}
 
-	oldInStock := storeBook.InStock
+	// check if an order with such ID already exist in the store
+	existentOrder, err := h.service.StoreOrder.GetById(input.OrderId)
+	if err == nil {
+		h.updateExistentStoreOrder(c, input, existentOrder, book)
+
+	} else {
+		h.createNewStoreOrder(c, input, book)
+	}
+}
+
+func (h *Handler) updateBookInStockIfEnough(quantity int, book model.StoreBook) (bool, error) {
+
+	// check if we have enough books in the store
+	if book.InStock >= quantity {
+		book.InStock -= quantity
+		// update in_stock value
+		err := h.service.StoreBook.Update(book.BookId, book)
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
+// create a new store order
+func (h *Handler) createNewStoreOrder(c *gin.Context,
+	input model.StoreOrder, book model.StoreBook) {
 
 	now := time.Now()
 
-	order := model.StoreOrder{
+	newOrder := model.StoreOrder{
 		OrderId:    input.OrderId,
 		BookId:     input.BookId,
 		Quantity:   input.Quantity,
@@ -52,32 +71,33 @@ func (h *Handler) createStoreOrder(c *gin.Context) {
 		ModifiedAt: now,
 	}
 
-	if storeBook.InStock >= order.Quantity {
-		storeBook.InStock -= order.Quantity
-		// update in_stock value
-		err = h.service.StoreBook.Update(storeBook.BookId, storeBook)
-		if err != nil {
-			// return error with books
-			c.JSON(http.StatusInternalServerError, StatusResponse{
-				Status: "failed",
-				Reason: err.Error(),
-			})
-			return
-		}
-		order.Status = "success"
-		order.Reason = ""
+	// just remeber the old vaule to restore it if any issue happens
+	oldInStock := book.InStock
+
+	result, err := h.updateBookInStockIfEnough(newOrder.Quantity, book)
+	if err != nil {
+		// return error with books
+		c.JSON(http.StatusInternalServerError, StatusResponse{
+			Status: "failed",
+			Reason: err.Error(),
+		})
+	}
+
+	if result == true {
+		newOrder.Status = "success"
+		newOrder.Reason = ""
 	} else {
-		order.Status = "failed"
-		order.Reason = "Not enough amout"
+		newOrder.Status = "failed"
+		newOrder.Reason = "Not enough amount of books in the store"
 	}
 
 	// create order
-	id, err := h.service.StoreOrder.Create(order)
+	id, err := h.service.StoreOrder.Create(newOrder)
 	if err != nil {
 		// restore old in_stock value
-		storeBook.InStock = oldInStock
+		book.InStock = oldInStock
 
-		h.service.StoreBook.Update(storeBook.BookId, storeBook)
+		h.service.StoreBook.Update(book.BookId, book)
 
 		// return error with order
 		c.JSON(http.StatusInternalServerError, StatusResponse{
@@ -87,15 +107,71 @@ func (h *Handler) createStoreOrder(c *gin.Context) {
 		return
 	}
 
-	var reason string = order.Reason
-	if reason == "" {
-		reason = strconv.Itoa(id)
-	}
+	newOrder.ID = id
 
-	c.JSON(http.StatusOK, StatusResponse{
-		Status: order.Status,
-		Reason: reason,
-	})
+	c.JSON(http.StatusOK, newOrder)
+}
+
+// update existent store order
+func (h *Handler) updateExistentStoreOrder(c *gin.Context,
+	input model.StoreOrder, existentOrder *model.StoreOrder, book model.StoreBook) {
+	// the order already exists and already successfuy processed
+	// and nothing changed, then just do nothing and return existant order
+	if existentOrder.Status == "success" {
+		if existentOrder.BookId == input.BookId &&
+			existentOrder.Quantity == input.Quantity {
+			c.JSON(http.StatusOK, existentOrder)
+			return
+		} else {
+			// that's not possible to change any parameters of the order which was successfuly completed
+			c.JSON(http.StatusBadRequest, StatusResponse{
+				Status: "failed",
+				Reason: "Cannot change parameters of the completed order",
+			})
+			return
+		}
+	} else {
+		// so, the order exists but processing was not successful (status is failed or canceled)
+		// we just try to process such and order once again
+		// just remeber the old vaule to restore it if any issue happens
+		// just remeber the old vaule to restore it if any issue happens
+		// just remeber the old vaule to restore it if any issue happens
+		oldInStock := book.InStock
+
+		bookStoreUpdated, err := h.updateBookInStockIfEnough(existentOrder.Quantity, book)
+		if err != nil {
+			// return error with books
+			c.JSON(http.StatusInternalServerError, StatusResponse{
+				Status: "failed",
+				Reason: err.Error(),
+			})
+		}
+
+		if bookStoreUpdated {
+			existentOrder.Status = "success"
+			existentOrder.Reason = ""
+		} else {
+			existentOrder.Status = "failed"
+			existentOrder.Reason = "Not enough amount of books in the store"
+		}
+
+		existentOrder.ModifiedAt = time.Now()
+
+		// create order
+		err = h.service.StoreOrder.Update(input.OrderId, existentOrder)
+		if err != nil {
+			// restore old in_stock value
+			book.InStock = oldInStock
+			h.service.StoreBook.Update(book.BookId, book)
+			// return error with order
+			c.JSON(http.StatusInternalServerError, StatusResponse{
+				Status: "failed",
+				Reason: err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, existentOrder)
+	}
 }
 
 // Cancel order

@@ -11,7 +11,7 @@ import (
 )
 
 // add book to store
-func (h *Handler) createStoreBook(c *gin.Context) {
+func (h *Handler) addBookToStore(c *gin.Context) {
 	var input model.StoreBook
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, StatusResponse{
@@ -21,6 +21,17 @@ func (h *Handler) createStoreBook(c *gin.Context) {
 		return
 	}
 
+	// check if such a book is already presented in the store
+	book, err := h.service.StoreBook.GetById(input.BookId)
+	if err == nil {
+		// just update in_stock for existant book
+		book.InStock = input.InStock
+		book.ModifiedAt = time.Now()
+		h.service.StoreBook.Update(input.BookId, book)
+		return
+	}
+
+	// otherwise create a new book in store
 	now := time.Now()
 
 	item := model.StoreBook{
@@ -39,10 +50,16 @@ func (h *Handler) createStoreBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, StatusResponse{
-		Status: "success",
-		Reason: strconv.Itoa(id),
-	})
+	book, err = h.service.StoreBook.GetById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, StatusResponse{
+			Status: "failed",
+			Reason: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
 }
 
 // update book amount in the store
@@ -79,10 +96,16 @@ func (h *Handler) updateStoreBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, StatusResponse{
-		Status: "success",
-		Reason: strconv.Itoa(id),
-	})
+	book, err := h.service.StoreBook.GetById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, StatusResponse{
+			Status: "failed",
+			Reason: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
 }
 
 // get book in store by id
@@ -97,7 +120,7 @@ func (h *Handler) getStoreBookById(c *gin.Context) {
 		return
 	}
 
-	order, err := h.service.StoreBook.GetById(id)
+	book, err := h.service.StoreBook.GetById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
@@ -106,7 +129,7 @@ func (h *Handler) getStoreBookById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, order)
+	c.JSON(http.StatusOK, book)
 }
 
 // delete book from the store
@@ -130,6 +153,7 @@ func (h *Handler) deleteStoreBook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, StatusResponse{
+		Id:     id,
 		Status: "success",
 	})
 }

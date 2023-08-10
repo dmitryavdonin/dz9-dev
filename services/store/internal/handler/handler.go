@@ -28,7 +28,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	product_api := router.Group("/store/book")
 	{
-		product_api.POST("/", h.createStoreBook)
+		product_api.POST("/", h.addBookToStore)
 		product_api.GET("/", h.getAllStoreBooks)
 		product_api.GET("/:id", h.getStoreBookById)
 		product_api.DELETE("/:id", h.deleteStoreBook)

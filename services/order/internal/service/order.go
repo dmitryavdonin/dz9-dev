@@ -21,6 +21,10 @@ func (s *OrderService) GetById(id int) (model.Order, error) {
 	return s.repo.GetById(id)
 }
 
+func (s *OrderService) GetAll(limit int, offset int) ([]model.Order, error) {
+	return s.repo.GetAll(limit, offset)
+}
+
 func (s *OrderService) Delete(id int) error {
 	return s.repo.Delete(id)
 }

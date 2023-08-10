@@ -31,9 +31,13 @@ func (h *Handler) create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": id,
-	})
+	book, err := h.services.GetById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
 }
 
 func (h *Handler) getById(c *gin.Context) {
@@ -63,7 +67,7 @@ func (h *Handler) getAll(c *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var items []model.Book
-	items, err := h.services.Book.GetAll(intLimit, offset) //r.DB.Limit(intLimit).Offset(offset).Find(&items)
+	items, err := h.services.Book.GetAll(intLimit, offset)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -114,7 +118,11 @@ func (h *Handler) update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": id,
-	})
+	book, err := h.services.GetById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, book)
 }

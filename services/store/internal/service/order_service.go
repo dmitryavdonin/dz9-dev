@@ -17,7 +17,7 @@ func (s *StoreOrderService) Create(order model.StoreOrder) (int, error) {
 	return s.repo.Create(order)
 }
 
-func (s *StoreOrderService) GetById(order_id int) (model.StoreOrder, error) {
+func (s *StoreOrderService) GetById(order_id int) (*model.StoreOrder, error) {
 	return s.repo.GetById(order_id)
 }
 
@@ -29,7 +29,7 @@ func (s *StoreOrderService) Delete(order_id int) error {
 	return s.repo.Delete(order_id)
 }
 
-func (s *StoreOrderService) Update(order_id int, input model.StoreOrder) error {
+func (s *StoreOrderService) Update(order_id int, input *model.StoreOrder) error {
 	return s.repo.Update(order_id, input)
 }
 

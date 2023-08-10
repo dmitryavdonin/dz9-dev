@@ -23,10 +23,10 @@ func (r *StoreOrderPostgres) Create(order model.StoreOrder) (int, error) {
 	return order.ID, nil
 }
 
-func (r *StoreOrderPostgres) GetById(order_id int) (model.StoreOrder, error) {
+func (r *StoreOrderPostgres) GetById(order_id int) (*model.StoreOrder, error) {
 	var order model.StoreOrder
 	result := r.db.First(&order, "order_id = ?", order_id)
-	return order, result.Error
+	return &order, result.Error
 }
 
 func (r *StoreOrderPostgres) GetAll(limit int, offset int) ([]model.StoreOrder, error) {
@@ -43,7 +43,7 @@ func (r *StoreOrderPostgres) Delete(order_id int) error {
 	return result.Error
 }
 
-func (r *StoreOrderPostgres) Update(order_id int, input model.StoreOrder) error {
+func (r *StoreOrderPostgres) Update(order_id int, input *model.StoreOrder) error {
 	var updatedItem model.StoreOrder
 	result := r.db.First(&updatedItem, "order_id = ?", order_id)
 	if result.Error != nil {

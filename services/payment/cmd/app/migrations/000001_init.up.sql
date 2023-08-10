@@ -1,12 +1,10 @@
-CREATE TABLE "order" (
+CREATE TABLE "payment" (
     "id" serial primary key,
     "user_id" integer not null,
-    "book_id" integer not null,
-    "quantity" integer not null,
+    "order_id" integer not null,
+    "money" integer not null,
     "status" varchar,
     "reason" varchar,
-    "delivery_address" varchar,
-    "delivery_date" timestamp,
     "created_at" timestamp not null,
     "modified_at" timestamp not null
 )

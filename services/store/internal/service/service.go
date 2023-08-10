@@ -7,10 +7,10 @@ import (
 
 type StoreOrder interface {
 	Create(so model.StoreOrder) (int, error)
-	GetById(order_id int) (model.StoreOrder, error)
+	GetById(order_id int) (*model.StoreOrder, error)
 	GetAll(limit int, offset int) ([]model.StoreOrder, error)
 	Delete(order_id int) error
-	Update(order_id int, input model.StoreOrder) error
+	Update(order_id int, input *model.StoreOrder) error
 	AlreadyExists(order_id int) bool
 }
 
