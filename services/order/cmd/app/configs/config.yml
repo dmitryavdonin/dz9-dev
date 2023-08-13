@@ -12,3 +12,5 @@ kafka:
 
 api:
     StoreURI: "http://arch.homework:8004/store"
+    PaymentURI: "http://arch.homework:8005/payment"
+    BookURI: "http://arch.homework:8002/book"

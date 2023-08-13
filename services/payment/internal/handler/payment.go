@@ -44,7 +44,7 @@ func (h *Handler) createPayment(c *gin.Context) {
 
 	//get user ub
 	logrus.Printf("CreatePayment(): Try to get user balance for user_id = %d", pay.UserId)
-	ub, err := h.services.User.GetBalance(c, pay.UserId)
+	balance, err := h.services.User.GetBalance(c, pay.UserId)
 	if err != nil {
 		pay.Status = "failed"
 		pay.Reason = err.Error()
@@ -56,11 +56,11 @@ func (h *Handler) createPayment(c *gin.Context) {
 
 	pay.ModifiedAt = time.Now()
 
-	if ub.Balance >= pay.Money {
-		ub.Balance -= pay.Money
+	if balance >= pay.Money {
+		balance -= pay.Money
 
-		logrus.Printf("CreatePayment(): Try to update user balance = %d for user_id = %d", ub.Balance, pay.UserId)
-		if err := h.services.User.UpdateBalance(c, ub); err != nil {
+		logrus.Printf("CreatePayment(): Try to update user balance = %d for user_id = %d", balance, pay.UserId)
+		if err := h.services.User.UpdateBalance(c, pay.UserId, balance); err != nil {
 			pay.Status = "failed"
 			pay.Reason = err.Error()
 			h.services.Payment.Update(pay)
@@ -72,14 +72,20 @@ func (h *Handler) createPayment(c *gin.Context) {
 			return
 		}
 	} else {
-		pay.Status = "faled"
+		pay.Status = "failed"
 		pay.Reason = "Not enough balance"
 
-		h.services.Payment.Update(pay)
+		if err = h.services.Payment.Update(pay); err != nil {
+			pay.Status = "failed"
+			pay.Reason = err.Error()
+			c.JSON(http.StatusInternalServerError, pay)
+			logrus.Errorf("CreatePayment(): Cannot update payment for order_id = %d, error = %s", pay.OrderId, err.Error())
+			return
+		}
 
 		c.JSON(http.StatusOK, pay)
 
-		logrus.Errorf("CreatePayment(): Not enough balance for order_id = %d, error = %s", pay.OrderId, err.Error())
+		logrus.Printf("CreatePayment(): Payment failed. Not enough balance for order_id = %d", pay.OrderId)
 
 		return
 	}
@@ -154,28 +160,26 @@ func (h *Handler) deletePayment(c *gin.Context) {
 // Cancel order
 func (h *Handler) cancelPayment(c *gin.Context) {
 	logrus.Printf("cancelPayment(): BEGIN")
-	order_id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, StatusResponse{
-			Status: "failed",
-			Reason: err.Error(),
-		})
+
+	var input model.CancelPayment
+	if err := c.BindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, StatusResponse{Status: "failed", Reason: err.Error()})
 		logrus.Errorf("cancelPayment(): Cannot parse input, error = %s", err.Error())
 		return
 	}
 
 	// get payment
-	pay, err := h.services.Payment.GetById(order_id)
+	pay, err := h.services.Payment.GetById(input.OrderId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
-		logrus.Errorf("cancelPayment(): Cannot get payment for order_id = %d, error = %s", order_id, err.Error())
+		logrus.Errorf("cancelPayment(): Cannot get payment for order_id = %d, error = %s", input.OrderId, err.Error())
 		return
 	}
 
-	logrus.Printf("cancelPayment(): payment status = %s for order_id = %d", pay.Status, order_id)
+	logrus.Printf("cancelPayment(): payment status = %s for order_id = %d", pay.Status, input.OrderId)
 
 	// check pay status
 	// only success payment can be canceled
@@ -184,55 +188,55 @@ func (h *Handler) cancelPayment(c *gin.Context) {
 			Status: "failed",
 			Reason: "Failed payment cannot be canceled",
 		})
-		logrus.Errorf("cancelPayment(): Failed payment cannot be canceled, order_id = %d", order_id)
+		logrus.Errorf("cancelPayment(): Failed payment cannot be canceled, order_id = %d", input.OrderId)
 		return
 	}
 	if pay.Status == "canceled" {
 		c.JSON(http.StatusOK, pay)
-		logrus.Printf("cancelPayment(): Payment already canceled, order_id = %d", order_id)
+		logrus.Printf("cancelPayment(): Payment already canceled, order_id = %d", input.OrderId)
 		return
 	}
 
 	// get user balance
-	logrus.Printf("cancelPayment(): Try to get user balance, user_id = %d, order_id = %d", pay.UserId, order_id)
-	ub, err := h.services.User.GetBalance(c, pay.UserId)
+	logrus.Printf("cancelPayment(): Try to get user balance, user_id = %d, order_id = %d", pay.UserId, input.OrderId)
+	balance, err := h.services.User.GetBalance(c, pay.UserId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
-		logrus.Errorf("cancelPayment(): Cannot get user balance user_id = %d, order_id = %d, error = %s", pay.UserId, order_id, err.Error())
+		logrus.Errorf("cancelPayment(): Cannot get user balance user_id = %d, order_id = %d, error = %s", pay.UserId, input.OrderId, err.Error())
 		return
 	}
 
 	// return the amount of money back to the user's balance
-	ub.Balance += pay.Money
-	logrus.Printf("cancelPayment(): Try to return the money = %d tot the user balance = %d, user_id = %d, order_id = %d", pay.Money, ub.Balance, pay.UserId, order_id)
-	if err := h.services.User.UpdateBalance(c, ub); err != nil {
+	balance += pay.Money
+	logrus.Printf("cancelPayment(): Try to return the money = %d tot the user balance = %d, user_id = %d, order_id = %d", pay.Money, balance, pay.UserId, input.OrderId)
+	if err := h.services.User.UpdateBalance(c, pay.UserId, balance); err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
-		logrus.Errorf("cancelPayment(): Cannot return the money to the user balance, user_id = %d, order_id = %d, error = %s", pay.UserId, order_id, err.Error())
+		logrus.Errorf("cancelPayment(): Cannot return the money to the user balance, user_id = %d, order_id = %d, error = %s", pay.UserId, input.OrderId, err.Error())
 		return
 	}
 
 	// update order status to canceled
 	pay.Status = "canceled"
-	pay.Reason = ""
+	pay.Reason = input.Reason
 	pay.ModifiedAt = time.Now()
 
-	logrus.Printf("cancelPayment(): Try to update order status with canceled, order_id = %d", order_id)
+	logrus.Printf("cancelPayment(): Try to update order status with canceled, reason = %s, order_id = %d", input.Reason, input.OrderId)
 	if err := h.services.Payment.Update(pay); err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
-		logrus.Errorf("cancelPayment(): Cannot update order status with canceled, order_id = %d, error = %s", order_id, err.Error())
+		logrus.Errorf("cancelPayment(): Cannot update order status with canceled, order_id = %d, error = %s", input.OrderId, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, pay)
 
-	logrus.Printf("cancelPayment(): END, order_id = %d", order_id)
+	logrus.Printf("cancelPayment(): END, order_id = %d", input.OrderId)
 }

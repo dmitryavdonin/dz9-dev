@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"payment/internal/model"
 	"payment/internal/service/adapters/user"
 )
 
@@ -14,10 +13,10 @@ func NewUserService(repo user.UserApi) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) GetBalance(ctx context.Context, user_id int) (model.UserBalance, error) {
+func (s *UserService) GetBalance(ctx context.Context, user_id int) (int, error) {
 	return s.repo.GetBalance(ctx, user_id)
 }
 
-func (s *UserService) UpdateBalance(ctx context.Context, ub model.UserBalance) error {
-	return s.repo.UpdateBalance(ctx, ub)
+func (s *UserService) UpdateBalance(ctx context.Context, user_id int, balance int) error {
+	return s.repo.UpdateBalance(ctx, user_id, balance)
 }

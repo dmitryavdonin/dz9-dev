@@ -2,41 +2,11 @@ package repository
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"payment/internal/repository/user/dto"
-	"strconv"
 )
-
-type UserApi struct {
-	baseUrl string
-}
-
-func NewUserApi(baseUrl string) *UserApi {
-	return &UserApi{baseUrl: baseUrl}
-}
-
-func (r *UserApi) GetBalance(ctx context.Context, user_id int) (balance int, err error) {
-	response := &dto.CreateGetBalanceResponse{}
-
-	_, err = sendGetRequest(r.baseUrl+"/"+strconv.Itoa(user_id), "application/json", response)
-	return response.Balance, nil
-}
-
-func (r *UserApi) UpdateBalance(ctx context.Context, userId int, balance int) error {
-	request := &dto.CreateUpdateBalanceRequest{
-		Balance: balance,
-	}
-
-	response := &dto.CreateUpdateBalanceResponse{}
-
-	_, err := sendRequest(r.baseUrl+"/"+strconv.Itoa(userId), http.MethodPut, "application/json", request, response)
-
-	return err
-}
 
 func sendGetRequest(url, contentType string, response interface{}) (code int, err error) {
 	req, err := http.NewRequest("GET", url, nil)
@@ -114,6 +84,8 @@ func prepareBody(data interface{}) (buffer *bytes.Buffer, err error) {
 			return
 		}
 		buffer = bytes.NewBuffer(sendData)
+	} else {
+		buffer = nil
 	}
 	return
 }

@@ -11,37 +11,48 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// create order saga
 func (h *Handler) createOrderSaga(c *gin.Context, order_id int) {
 
+	logrus.Printf("createOrderSaga(): BEGIN Try to get order record order_id = %d", order_id)
 	order, err := h.services.Order.GetById(order_id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{Status: "failed", Reason: err.Error()})
-		logrus.Errorf("FAILED! Cannot get order with order_id = %d, error = %s", order_id, err.Error())
+		logrus.Errorf("createOrderSaga(): Cannot get order record order_id = %d, error = %s", order_id, err.Error())
 		return
 	}
 
+	logrus.Printf("createOrderSaga(): Try to execute Saga for creating an order order_id = %d", order_id)
 	result := h.services.Saga.CreateOrder(c, order)
 
 	order.Status = result.Status
 	order.Reason = result.Reason
 
+	logrus.Printf("createOrderSaga(): Try to update order record status = %s, reason = %s, order_id = %d", order.Status, order.Reason, order_id)
+
 	err = h.services.Order.Update(order_id, order)
 	if err != nil {
-		logrus.Errorf("Cannot update order with order_id = %d, error = %s", order_id, err.Error())
+		logrus.Errorf("createOrderSaga(): Cannot update order record order_id = %d, error = %s", order_id, err.Error())
+		return
 	}
 
+	logrus.Printf("createOrderSaga(): END Saga execution completed order_id = %d", order_id)
 }
 
+// create order
 func (h *Handler) createOrder(c *gin.Context) {
+	logrus.Print("createOrder(): BEGIN ")
 	var input model.NewOrder
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, StatusResponse{Status: "failed", Reason: err.Error()})
+		logrus.Errorf("createOrder(): Cannot parse input, error = %s", err.Error())
 		return
 	}
 
 	var date, err = time.Parse("2006-01-02", input.DeliveryDate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, StatusResponse{Status: "failed", Reason: err.Error()})
+		logrus.Errorf("createOrder(): Cannot parse delivery date, error = %s", err.Error())
 		return
 	}
 
@@ -58,9 +69,11 @@ func (h *Handler) createOrder(c *gin.Context) {
 		ModifiedAt:      now,
 	}
 
+	logrus.Printf("createOrder(): Try to create order record: user_id = %d, book_id = %d, quantity = %d", order.UserId, order.BookId, order.Quantity)
 	id, err := h.services.Order.Create(order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{Status: "failed", Reason: err.Error()})
+		logrus.Errorf("createOrder(): Cannot create order record, error = %s", err.Error())
 		return
 	}
 
@@ -68,9 +81,11 @@ func (h *Handler) createOrder(c *gin.Context) {
 
 	c.JSON(http.StatusOK, order)
 
+	logrus.Printf("createOrder(): Try to create Saga for order_id = %d, user_id = %d, book_id = %d, quantity = %d", order.ID, order.UserId, order.BookId, order.Quantity)
 	go h.createOrderSaga(c, id)
 }
 
+// get order by id
 func (h *Handler) getOrderById(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -88,6 +103,7 @@ func (h *Handler) getOrderById(c *gin.Context) {
 	c.JSON(http.StatusOK, order)
 }
 
+// get all orders
 func (h *Handler) getAllOrders(c *gin.Context) {
 
 	var page = c.DefaultQuery("page", "1")
@@ -111,6 +127,7 @@ func (h *Handler) getAllOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "results": len(items), "data": items})
 }
 
+// delete order by id
 func (h *Handler) deleteOrder(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

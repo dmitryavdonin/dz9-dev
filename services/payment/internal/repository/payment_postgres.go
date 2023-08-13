@@ -26,7 +26,7 @@ func (r *PaymentPostgres) Create(pay model.Payment) (int, error) {
 
 func (r *PaymentPostgres) GetById(orderId int) (model.Payment, error) {
 	var order model.Payment
-	result := r.db.First(&order, "id = ?", orderId)
+	result := r.db.First(&order, "order_id = ?", orderId)
 	return order, result.Error
 }
 
@@ -40,13 +40,13 @@ func (r *PaymentPostgres) GetAll(limit int, offset int) ([]model.Payment, error)
 }
 
 func (r *PaymentPostgres) Delete(orderId int) error {
-	result := r.db.Delete(&model.Payment{}, "id = ?", orderId)
+	result := r.db.Delete(&model.Payment{}, "order_id = ?", orderId)
 	return result.Error
 }
 
 func (r *PaymentPostgres) Update(input model.Payment) error {
 	var updatedItem model.Payment
-	result := r.db.First(&updatedItem, "id = ?", input.OrderId)
+	result := r.db.First(&updatedItem, "order_id = ?", input.OrderId)
 	if result.Error != nil {
 		return result.Error
 	}

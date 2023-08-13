@@ -8,20 +8,24 @@ import (
 	"store/internal/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // create a new order in the store
 func (h *Handler) createStoreOrder(c *gin.Context) {
+	logrus.Printf("createStoreOrder(): BEGIN")
 	var input model.StoreOrder
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
+		logrus.Errorf("createStoreOrder(): Cannot parse input, error = %s", err.Error())
 		return
 	}
 
-	// at first try to find the required book in the sore
+	// at first try to find the required book in the store
+	logrus.Printf("createStoreOrder(): Try to get book in store by book_id = %d", input.BookId)
 	book, err := h.service.StoreBook.GetById(input.BookId)
 	if err != nil {
 		// cannot get book in store
@@ -29,22 +33,26 @@ func (h *Handler) createStoreOrder(c *gin.Context) {
 			Status: "failed",
 			Reason: "The required book not found",
 		})
+		logrus.Errorf("createStoreOrder(): Cannot get book_id = %d, error = %s", input.BookId, err.Error())
 		return
 	}
 
 	// check if an order with such ID already exist in the store
+	logrus.Printf("createStoreOrder(): Check if order_id = %d already exist", input.OrderId)
 	existentOrder, err := h.service.StoreOrder.GetById(input.OrderId)
 	if err == nil {
+		logrus.Printf("createStoreOrder(): order_id = %d already exist, so try to update the order in store", input.OrderId)
 		h.updateExistentStoreOrder(c, input, existentOrder, book)
-
 	} else {
+		logrus.Printf("createStoreOrder(): order_id = %d not already exist, so try to create a new the order in store", input.OrderId)
 		h.createNewStoreOrder(c, input, book)
 	}
 }
 
+// update book in store if the amout of books is enough for the order
 func (h *Handler) updateBookInStockIfEnough(quantity int, book model.StoreBook) (bool, error) {
-
 	// check if we have enough books in the store
+	logrus.Printf("updateBookInStockIfEnough(): Check if we have enough books in the store: in+stock = %d, quantity = %d", book.InStock, quantity)
 	if book.InStock >= quantity {
 		book.InStock -= quantity
 		// update in_stock value
@@ -83,7 +91,7 @@ func (h *Handler) createNewStoreOrder(c *gin.Context,
 		})
 	}
 
-	if result == true {
+	if result {
 		newOrder.Status = "success"
 		newOrder.Reason = ""
 	} else {
@@ -177,8 +185,10 @@ func (h *Handler) updateExistentStoreOrder(c *gin.Context,
 // Cancel order
 func (h *Handler) cancelStoreOrder(c *gin.Context) {
 
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	logrus.Print("cancelStoreOrder: BEGIN")
+
+	var input model.CancelOrder
+	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
@@ -187,12 +197,16 @@ func (h *Handler) cancelStoreOrder(c *gin.Context) {
 	}
 
 	// get order
-	order, err := h.service.StoreOrder.GetById(id)
+	logrus.Printf("cancelStoreOrder: Try to get store order by order_id = %d", input.OrderId)
+	order, err := h.service.StoreOrder.GetById(input.OrderId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
+
+		logrus.Errorf("cancelStoreOrder: Cannot get store order by order_id = %d, error = %s", input.OrderId, err.Error())
+
 		return
 	}
 
@@ -203,6 +217,9 @@ func (h *Handler) cancelStoreOrder(c *gin.Context) {
 			Status: "failed",
 			Reason: "Failed order cannot be canceled",
 		})
+
+		logrus.Printf("cancelStoreOrder: Cannot cancel the order order_id = %d because store order status is failed, only success store orders can be canceled", input.OrderId)
+
 		return
 	}
 	if order.Status == "canceled" {
@@ -210,41 +227,48 @@ func (h *Handler) cancelStoreOrder(c *gin.Context) {
 			Status: "success",
 			Reason: "canceled",
 		})
+		logrus.Printf("cancelStoreOrder: Store order_id = %d is already canceled", input.OrderId)
 		return
 	}
 
 	// get store book
+	logrus.Printf("cancelStoreOrder: Try to get the book with book_id = %d, order_id = %d", order.BookId, input.OrderId)
 	book, err := h.service.StoreBook.GetById(order.BookId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
+		logrus.Errorf("cancelStoreOrder: Cannot get book with book_id = %d, order_id = %d, error = %s", order.BookId, input.OrderId, err.Error())
 		return
 	}
 
 	// return the amount of books to the store
+	logrus.Printf("cancelStoreOrder: Try to update the book with book_id = %d, order_id = %d, old in_stock = %d, new in_stock = %d", order.BookId, input.OrderId, book.InStock, order.Quantity)
 	book.InStock += order.Quantity
 
-	err = h.service.StoreBook.Update(book.BookId, book)
-
-	if err != nil {
+	if err = h.service.StoreBook.Update(book.BookId, book); err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
+		logrus.Errorf("cancelStoreOrder: Cannot update the book with book_id = %d, order_id = %d, error = %s", order.BookId, input.OrderId, err.Error())
 		return
 	}
 
 	// update order status to canceled
 	order.Status = "canceled"
+	order.Reason = input.Reason
+	order.ModifiedAt = time.Now()
 
+	logrus.Printf("cancelStoreOrder: Try to update the store order order_id = %d with cancel status and reason = %s ", input.OrderId, order.Reason)
 	err = h.service.StoreOrder.Update(order.OrderId, order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, StatusResponse{
 			Status: "failed",
 			Reason: err.Error(),
 		})
+		logrus.Errorf("cancelStoreOrder: Cannot update the store order order_id = %d, error = %s", input.OrderId, err.Error())
 		return
 	}
 
@@ -254,6 +278,7 @@ func (h *Handler) cancelStoreOrder(c *gin.Context) {
 	})
 }
 
+// get store order by order_id
 func (h *Handler) getStoreOrderById(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))

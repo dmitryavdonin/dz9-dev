@@ -29,6 +29,6 @@ func (s *PaymentService) Delete(id int) error {
 	return s.repo.Delete(id)
 }
 
-func (s *PaymentService) Update(id int, pay model.Payment) error {
-	return s.repo.Update(id, pay)
+func (s *PaymentService) Update(pay model.Payment) error {
+	return s.repo.Update(pay)
 }

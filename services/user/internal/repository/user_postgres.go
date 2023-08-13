@@ -43,6 +43,7 @@ func (r *UserPostgres) Delete(id int) error {
 	return result.Error
 }
 
+// update user balance or username
 func (r *UserPostgres) Update(id int, input model.User) error {
 	var updated model.User
 	result := r.db.First(&updated, "id = ?", id)
@@ -56,6 +57,6 @@ func (r *UserPostgres) Update(id int, input model.User) error {
 		CreatedAt:  updated.CreatedAt,
 		ModifiedAt: now,
 	}
-	result = r.db.Model(&updated).Updates(bookToUpdate)
+	result = r.db.Model(&updated).Select("username", "balance", "modified_at").Updates(bookToUpdate)
 	return result.Error
 }

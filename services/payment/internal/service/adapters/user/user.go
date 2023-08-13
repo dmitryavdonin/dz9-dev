@@ -2,10 +2,9 @@ package user
 
 import (
 	"context"
-	"payment/internal/model"
 )
 
 type UserApi interface {
-	GetBalance(ctx context.Context, user_id int) (model.UserBalance, error)
-	UpdateBalance(ctx context.Context, ub model.UserBalance) error
+	GetBalance(ctx context.Context, user_id int) (int, error)
+	UpdateBalance(ctx context.Context, user_id int, balance int) error
 }

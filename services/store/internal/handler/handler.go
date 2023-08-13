@@ -20,7 +20,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	order_api := router.Group("/store/order")
 	{
 		order_api.POST("/", h.createStoreOrder)
-		order_api.POST("/cancel/:id", h.cancelStoreOrder)
+		order_api.POST("/cancel", h.cancelStoreOrder)
 		order_api.GET("/", h.getAllStoreOrders)
 		order_api.GET("/:id", h.getStoreOrderById)
 		order_api.DELETE("/:id", h.deleteStoreOrder)

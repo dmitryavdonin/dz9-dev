@@ -15,7 +15,7 @@ type Order interface {
 }
 
 type Saga interface {
-	CreateOrder(ctx context.Context, order model.Order) *model.StatusResponse
+	CreateOrder(ctx context.Context, order model.Order) model.StatusResponse
 }
 
 type Service struct {
@@ -26,6 +26,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Order: NewOrderService(repos.Order),
-		Saga:  NewSagaService(repos.Store),
+		Saga:  NewSagaService(repos.Store, repos.Payment, repos.Book),
 	}
 }

@@ -24,7 +24,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		api.GET("/:id", h.getById)
 		api.GET("/", h.getAll)
 		api.DELETE("/:id", h.deletePayment)
-
 	}
 
 	return router
