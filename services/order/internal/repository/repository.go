@@ -3,10 +3,9 @@ package repository
 import (
 	"context"
 	"order/internal/model"
+	"order/internal/service/adapters/delivery"
 	"order/internal/service/adapters/payment"
 	"order/internal/service/adapters/store"
-
-	//"order/internal/service/adapters/repository"
 
 	"gorm.io/gorm"
 )
@@ -26,10 +25,15 @@ type Store interface {
 
 type Payment interface {
 	DoPayment(ctx context.Context, info payment.PaymentInfo) (statusResponse model.StatusResponse, err error)
+	CancelPayment(ctx context.Context, orderId int, reason string) error
 }
 
 type Book interface {
 	GetBookPrice(ctx context.Context, bookId int) (bookPrice int, err error)
+}
+
+type Delivery interface {
+	DoDelivery(ctx context.Context, info delivery.DeliveryInfo) (statusRespone model.StatusResponse, err error)
 }
 
 type Repository struct {
@@ -37,13 +41,15 @@ type Repository struct {
 	Store
 	Payment
 	Book
+	Delivery
 }
 
-func NewRepository(db *gorm.DB, storeApiUri string, paymentApiUri string, bookApiUri string) *Repository {
+func NewRepository(db *gorm.DB, storeApiUri string, paymentApiUri string, bookApiUri string, deliveryApiUri string) *Repository {
 	return &Repository{
-		Order:   NewOrderPostgres(db),
-		Store:   NewStoreApi(storeApiUri),
-		Payment: NewPaymentApi(paymentApiUri),
-		Book:    NewBookApi(bookApiUri),
+		Order:    NewOrderPostgres(db),
+		Store:    NewStoreApi(storeApiUri),
+		Payment:  NewPaymentApi(paymentApiUri),
+		Book:     NewBookApi(bookApiUri),
+		Delivery: NewDeliveryApi(deliveryApiUri),
 	}
 }

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-app-config
+data:
+  APP_PORT: "{{ .Values.order.port}}"
+  APP_SERVICE_NAME: "order_service"
+  API_STORE_URI: "http://store-app.default.svc.cluster.local/store"
+  API_PAYMENT_URI: "http://payment-app.default.svc.cluster.local/payment"
+  API_BOOK_URI: "http://book-app.default.svc.cluster.local/book"
+  API_DELIVERY_URI: "http://delivery-app.default.svc.cluster.local/delivery"

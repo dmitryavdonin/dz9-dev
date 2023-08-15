@@ -28,6 +28,7 @@ func (h *Handler) addBookToStore(c *gin.Context) {
 		book.InStock = input.InStock
 		book.ModifiedAt = time.Now()
 		h.service.StoreBook.Update(input.BookId, book)
+		c.JSON(http.StatusOK, book)
 		return
 	}
 
@@ -50,16 +51,9 @@ func (h *Handler) addBookToStore(c *gin.Context) {
 		return
 	}
 
-	book, err = h.service.StoreBook.GetById(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, StatusResponse{
-			Status: "failed",
-			Reason: err.Error(),
-		})
-		return
-	}
+	item.ID = id
 
-	c.JSON(http.StatusOK, book)
+	c.JSON(http.StatusOK, item)
 }
 
 // update book amount in the store

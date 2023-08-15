@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"order/internal/config"
 	"order/internal/handler"
 	"order/internal/order"
 	"order/internal/repository"
@@ -14,23 +15,23 @@ import (
 
 	"github.com/dmitryavdonin/gtools/migrations"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	if err := initConfig(); err != nil {
-		logrus.Fatalf("error initializing configs: %s", err.Error())
+	cfg, err := config.InitConfig("")
+	if err != nil {
+		panic(fmt.Sprintf("error initializing config %s", err))
 	}
 
 	//db migrations
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		viper.GetString("db.username"),
-		viper.GetString("db.password"),
-		viper.GetString("db.host"),
-		viper.GetString("db.port"),
-		viper.GetString("db.dbname"))
+		cfg.DB.Username,
+		cfg.DB.Password,
+		cfg.DB.Host,
+		cfg.DB.Port,
+		cfg.DB.DBname)
 
 	migrate, err := migrations.NewMigrations(dsn, "file://migrations")
 	if err != nil {
@@ -42,27 +43,22 @@ func main() {
 		logrus.Fatalf("migrations error: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		DBName:   viper.GetString("db.dbname"),
-		Password: viper.GetString("db.password"),
-	})
+	db, err := repository.NewPostgresDB(dsn)
 
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
 	repos := repository.NewRepository(db,
-		viper.GetString("api.storeuri"),
-		viper.GetString("api.paymenturi"),
-		viper.GetString("api.bookuri"),
+		cfg.API.StoreURI,
+		cfg.API.PaymentURI,
+		cfg.API.BookURI,
+		cfg.API.DeliveryURI,
 	)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	var port = viper.GetString("port")
+	var port = cfg.App.Port
 
 	srv := new(order.Server)
 	go func() {
@@ -71,22 +67,15 @@ func main() {
 		}
 	}()
 
-	logrus.Print("order app started")
+	logrus.Printf("Service %s started", cfg.App.ServiceName)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Print("order app shutting down")
+	logrus.Printf("Service %s shutting down", cfg.App.ServiceName)
 
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
-
-}
-
-func initConfig() error {
-	viper.AddConfigPath("configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }

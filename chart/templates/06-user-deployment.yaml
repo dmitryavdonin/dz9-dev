@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-app
+spec:
+  replicas: {{ .Values.user.replicaCount}}
+  selector:
+    matchLabels:
+      app: user-app
+  template:
+    metadata:
+      labels:
+        app: user-app
+    spec:
+      containers:
+      - name: user-app
+        image: {{ .Values.user.container.image}}
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: {{ .Values.user.port}}
+        envFrom:
+          - configMapRef:
+              name: user-app-config
+          - secretRef:
+              name: user-postgres-secret

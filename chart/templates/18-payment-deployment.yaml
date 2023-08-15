@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-app
+spec:
+  replicas: {{ .Values.payment.replicaCount}}
+  selector:
+    matchLabels:
+      app: payment-app
+  template:
+    metadata:
+      labels:
+        app: payment-app
+    spec:
+      containers:
+      - name: payment-app
+        image: {{ .Values.payment.container.image}}
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: {{ .Values.payment.port}}
+        envFrom:
+          - configMapRef:
+              name: payment-app-config
+          - secretRef:
+              name: payment-postgres-secret

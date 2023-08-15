@@ -30,9 +30,9 @@ func (h *Handler) create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"id": id,
-	})
+	item.ID = id
+
+	c.JSON(http.StatusOK, item)
 }
 
 func (h *Handler) getById(c *gin.Context) {

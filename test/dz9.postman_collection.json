@@ -1,0 +1,1162 @@
+{
+	"info": {
+		"_postman_id": "c15d819c-e99d-4471-8c68-0b3bf00bbfcf",
+		"name": "dz9",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "795865",
+		"_collection_link": "https://otus-dmitryavdonin.postman.co/workspace/otus~82993246-0f01-4d25-adef-9e5b9e2d034b/collection/795865-c15d819c-e99d-4471-8c68-0b3bf00bbfcf?action=share&creator=795865&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Пререквизиты",
+			"item": [
+				{
+					"name": "Добавить book 1 с ценой 5 в продажу",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Добавить book 1 с ценой 5 в продажу\", function () {\r",
+									"    var responseJSON = JSON.parse(responseBody);\r",
+									"    console.log(responseJSON);\r",
+									"    pm.collectionVariables.set(\"book1_id\", responseJSON[\"id\"]);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": {{book1_title}},\r\n  \"author\": {{book1_author}},\r\n  \"price\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlBook}}/book/",
+							"host": [
+								"{{baseUrlBook}}"
+							],
+							"path": [
+								"book",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Разместить 5 штук book 1 на складе",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Разместить 5 штук book 1 на складе\", function () {\r",
+									"    var responseJSON = JSON.parse(responseBody);\r",
+									"    console.log(responseJSON);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"book_id\": {{book1_id}},\r\n    \"in_stock\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlStore}}/store/book/",
+							"host": [
+								"{{baseUrlStore}}"
+							],
+							"path": [
+								"store",
+								"book",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавить покупателя с балансом 10",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Добавить покупателя\", function () {\r",
+									"    var responseJSON = JSON.parse(responseBody);\r",
+									"    pm.collectionVariables.set(\"user1_id\", responseJSON[\"id\"]);\r",
+									"    console.log(responseJSON);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": {{user1_username}},\r\n  \"balance\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlUser}}/user/",
+							"host": [
+								"{{baseUrlUser}}"
+							],
+							"path": [
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Заказ 1 (успешный)",
+			"item": [
+				{
+					"name": "Создать заказ 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Создать заказ 1\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    pm.collectionVariables.set(\"order1_id\", resp[\"id\"]);\r",
+									"    pm.expect(resp.status).to.eql(\"pending\");\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": {{user1_id}},\r\n  \"book_id\": {{book1_id}},\r\n  \"quantity\": 1,\r\n  \"delivery_address\": {{delivery_address1}},\r\n  \"delivery_date\": {{delivery_date1}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 1 через 2 секунды",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(function(){}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 1 через 2 секунды\", function () {\r",
+									"    var resp = JSON.parse(responseBody)\r",
+									"    console.log(\"Order status: \" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"success\");    \r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/:id",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order1_id}}",
+									"description": "Order ID (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 1 на складе",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 1 на складе\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status in store:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"success\");    \r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlStore}}/store/order/:id",
+							"host": [
+								"{{baseUrlStore}}"
+							],
+							"path": [
+								"store",
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order1_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус оплаты заказа 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус оплаты заказа 1\", function () {\r",
+									"    var resp = JSON.parse(responseBody);  \r",
+									"    console.log(\"Payment status:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"success\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlPay}}/payment/:id",
+							"host": [
+								"{{baseUrlPay}}"
+							],
+							"path": [
+								"payment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order1_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус доставки заказа 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус доставки заказа 1\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Delivery status:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"success\");  \r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlDelivery}}/delivery/:id",
+							"host": [
+								"{{baseUrlDelivery}}"
+							],
+							"path": [
+								"delivery",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order1_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Успешно проходят все шаги саги по созданию заказа:\n\n1. размещение заказа на складе\n2. оплата заказа\n3. оформление доставки заказа"
+		},
+		{
+			"name": "Заказ 2 (ошибка склада)",
+			"item": [
+				{
+					"name": "Создать заказ 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Создать заказ 2\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    pm.collectionVariables.set(\"order2_id\", resp[\"id\"]);\r",
+									"    pm.expect(resp.status).to.eql(\"pending\");\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": {{user1_id}},\r\n  \"book_id\": {{book1_id}},\r\n  \"quantity\": 8,\r\n  \"delivery_address\": {{delivery_address1}},\r\n  \"delivery_date\": {{delivery_date1}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 2 через 2 секунды",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(function(){}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 2 через 2 секунды\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status: \" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Not enough books in the store\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/:id",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order2_id}}",
+									"description": "Order ID (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 2 на складе",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 2 на складе\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status in store:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Not enough books in the store\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlStore}}/store/order/:id",
+							"host": [
+								"{{baseUrlStore}}"
+							],
+							"path": [
+								"store",
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order2_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус оплаты заказа 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус оплаты заказа 2\", function () {\r",
+									"    var resp = JSON.parse(responseBody);  \r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlPay}}/payment/:id",
+							"host": [
+								"{{baseUrlPay}}"
+							],
+							"path": [
+								"payment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order2_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус доставки заказа 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус доставки заказа 2\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlDelivery}}/delivery/:id",
+							"host": [
+								"{{baseUrlDelivery}}"
+							],
+							"path": [
+								"delivery",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order2_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "1. размещение заказа на складе - ошибка, недостаточно книг на складе\n2. оплата заказа - не выполняется\n3. оформление доставки заказа - не выполняется"
+		},
+		{
+			"name": "Заказ 3 (ошибка оплаты)",
+			"item": [
+				{
+					"name": "Создать заказ 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Создать заказ 3\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    pm.collectionVariables.set(\"order3_id\", resp[\"id\"]);\r",
+									"    pm.expect(resp.status).to.eql(\"pending\");\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": {{user1_id}},\r\n  \"book_id\": {{book1_id}},\r\n  \"quantity\": 3,\r\n  \"delivery_address\": {{delivery_address1}},\r\n  \"delivery_date\": {{delivery_date1}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 3 через 2 секунды",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(function(){}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 3 через 2 секунды\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status: \" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Not enough balance\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/:id",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order3_id}}",
+									"description": "Order ID (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 3 на складе",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 3 на складе\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status in store:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"canceled\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Payment failed\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlStore}}/store/order/:id",
+							"host": [
+								"{{baseUrlStore}}"
+							],
+							"path": [
+								"store",
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order3_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус оплаты заказа 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус оплаты заказа 3\", function () {\r",
+									"    var resp = JSON.parse(responseBody);   \r",
+									"    console.log(\"Payment status:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Not enough balance\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlPay}}/payment/:id",
+							"host": [
+								"{{baseUrlPay}}"
+							],
+							"path": [
+								"payment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order3_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус доставки заказа 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус доставки заказа 3\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlDelivery}}/delivery/:id",
+							"host": [
+								"{{baseUrlDelivery}}"
+							],
+							"path": [
+								"delivery",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order3_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "1. размещение заказа на складе - успешно\n2. оплата заказа - ошибка, недостаточно средств, откатить шаг 1\n3. оформление доставки заказа - не выполняется"
+		},
+		{
+			"name": "Заказ 4 (ошибка доставки)",
+			"item": [
+				{
+					"name": "Создать заказ 4",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Создать заказ 4\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    pm.collectionVariables.set(\"order4_id\", resp[\"id\"]);\r",
+									"    pm.expect(resp.status).to.eql(\"pending\");\r",
+									"    console.log(resp);\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": {{user1_id}},\r\n  \"book_id\": {{book1_id}},\r\n  \"quantity\": 1,\r\n  \"delivery_address\": {{delivery_address1}},\r\n  \"delivery_date\": \"2023-08-01\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 4 через 2 секунды",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(function(){}, 2000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 4 через 2 секунды\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status: \" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"No couriers available for this date\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlOrder}}/order/:id",
+							"host": [
+								"{{baseUrlOrder}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order4_id}}",
+									"description": "Order ID (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус заказа 4 на складе",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус заказа 4 на складе\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Order status in store:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"canceled\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Delivery failed\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlStore}}/store/order/:id",
+							"host": [
+								"{{baseUrlStore}}"
+							],
+							"path": [
+								"store",
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order4_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус оплаты заказа 4",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус оплаты заказа 4\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Payment status:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"canceled\");\r",
+									"    pm.expect(resp.reason).to.eql(\"Delivery failed\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlPay}}/payment/:id",
+							"host": [
+								"{{baseUrlPay}}"
+							],
+							"path": [
+								"payment",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order4_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверить статус доставки заказа 4",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Проверить статус доставки заказа 4\", function () {\r",
+									"    var resp = JSON.parse(responseBody);\r",
+									"    console.log(\"Delivery status:\" + resp.status + \", reason: \" + resp.reason);\r",
+									"    pm.expect(resp.status).to.eql(\"failed\");\r",
+									"    pm.expect(resp.reason).to.eql(\"No couriers available for this date\");\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrlDelivery}}/delivery/:id",
+							"host": [
+								"{{baseUrlDelivery}}"
+							],
+							"path": [
+								"delivery",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{order4_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "1. размещение заказа на складе - успешно\n2. оплата заказа - успешно\n3. оформление доставки заказа - не успешно (нет курьеров), откатить шаг 2, шаг 1"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrlUser",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlBook",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlStore",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlOrder",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlPay",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "baseUrlDelivery",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "delivery_address1",
+			"value": "\"Moscow, Shabolovka, 13\"",
+			"type": "string"
+		},
+		{
+			"key": "delivery_date1",
+			"value": "\"2023-08-23\"",
+			"type": "string"
+		},
+		{
+			"key": "order1_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "book1_id",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "book1_title",
+			"value": "\"Microservice Architecture\"",
+			"type": "string"
+		},
+		{
+			"key": "book1_author",
+			"value": "\"Chris Richardson\"",
+			"type": "string"
+		},
+		{
+			"key": "book1_price",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "book1_quantity",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "book1_instock",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "user1_id",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "user1_username",
+			"value": "\"i.petrov\"",
+			"type": "string"
+		},
+		{
+			"key": "user1_balance",
+			"value": "15",
+			"type": "string"
+		},
+		{
+			"key": "order2_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order3_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "order4_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

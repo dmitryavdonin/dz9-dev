@@ -1,8 +1,9 @@
-package order
+package payment
 
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -10,9 +11,9 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func (s *Server) Run(port string, handler http.Handler) error {
+func (s *Server) Run(port int, handler http.Handler) error {
 	s.httpServer = &http.Server{
-		Addr:           ":" + port,
+		Addr:           ":" + strconv.Itoa(port),
 		Handler:        handler,
 		MaxHeaderBytes: 1 << 20, // 1 MB
 		ReadTimeout:    10 * time.Second,

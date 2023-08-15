@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-app
+  labels:
+    app: delivery-app
+spec:
+  selector:
+    app: delivery-app
+  ports:
+    - name: web
+      port: 80
+      targetPort: {{ .Values.delivery.port}}
+  type: ClusterIP

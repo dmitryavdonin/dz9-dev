@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: delivery-app-config
+data:
+  APP_PORT: "{{ .Values.delivery.port}}"
+  APP_SERVICE_NAME: "delivery_service"

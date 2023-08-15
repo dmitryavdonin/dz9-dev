@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-app-config
+data:
+  APP_PORT: "{{ .Values.payment.port}}"
+  APP_SERVICE_NAME: "payment_service"
+  API_USER_URI: "http://user-app.default.svc.cluster.local/user"

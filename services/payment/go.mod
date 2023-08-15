@@ -55,6 +55,7 @@ require (
 	github.com/dmitryavdonin/gtools v0.0.0-20230508202840-fc1bc9585701
 	github.com/gin-gonic/gin v1.9.1
 	github.com/spf13/viper v1.16.0
+	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/sys v0.8.0 // indirect
 	gorm.io/driver/postgres v1.5.2
 )

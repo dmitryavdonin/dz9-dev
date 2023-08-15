@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-app
+  labels:
+    app: user-app
+spec:
+  selector:
+    app: user-app
+  ports:
+    - name: web
+      port: 80
+      targetPort: {{ .Values.user.port}}
+  type: ClusterIP

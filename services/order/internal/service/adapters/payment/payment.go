@@ -7,4 +7,5 @@ import (
 
 type PaymentApi interface {
 	DoPayment(ctx context.Context, info PaymentInfo) (result model.StatusResponse, err error)
+	CancelPayment(ctx context.Context, orderId int, reason string) error
 }

@@ -194,7 +194,7 @@ func (h *Handler) updateExistentStoreOrder(c *gin.Context,
 			existentOrder.Reason = ""
 		} else {
 			existentOrder.Status = "failed"
-			existentOrder.Reason = "Not enough amount of books in the store"
+			existentOrder.Reason = "Not enough books in the store"
 		}
 
 		existentOrder.ModifiedAt = time.Now()

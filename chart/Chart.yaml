@@ -1,0 +1,35 @@
+apiVersion: v2
+name: App-Otus-dz9
+description: Otus dz9
+type: application
+version: 0.0.1
+appVersion: "1.0.0"
+
+dependencies:
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: bookdb
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: userdb
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: deliverydb
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: storedb
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: paymentdb
+  - name: postgresql
+    version: 12.2.7
+    repository: https://charts.bitnami.com/bitnami
+    alias: orderdb
+  - name: ingress-nginx
+    repository: https://kubernetes.github.io/ingress-nginx
+    version: 4.6.0

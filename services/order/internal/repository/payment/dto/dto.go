@@ -10,3 +10,13 @@ type DoPaymentResponse struct {
 	Status string `json:"status"`
 	Reason string `json:"reason"`
 }
+
+type CancelPaymentRequest struct {
+	OrderId int    `json:"order_id"`
+	Reason  string `json:"reason"`
+}
+
+type CancelPaymentResponse struct {
+	Status string `json:"status"`
+	Reason string `json:"reason"`
+}

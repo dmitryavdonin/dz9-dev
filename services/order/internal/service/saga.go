@@ -4,6 +4,7 @@ import (
 	"context"
 	"order/internal/model"
 	"order/internal/service/adapters/book"
+	"order/internal/service/adapters/delivery"
 	"order/internal/service/adapters/payment"
 	"order/internal/service/adapters/store"
 
@@ -11,26 +12,30 @@ import (
 )
 
 type SagaService struct {
-	storeApi   store.StoreApi
-	paymentAPi payment.PaymentApi
-	bookApi    book.BookApi
+	storeApi    store.StoreApi
+	paymentAPi  payment.PaymentApi
+	bookApi     book.BookApi
+	deliveryApi delivery.DeliveryApi
 }
 
-func NewSagaService(storeApi store.StoreApi, paymentAPi payment.PaymentApi, bookApi book.BookApi) *SagaService {
+func NewSagaService(storeApi store.StoreApi, paymentAPi payment.PaymentApi, bookApi book.BookApi, deliveryApi delivery.DeliveryApi) *SagaService {
 	return &SagaService{
-		storeApi:   storeApi,
-		paymentAPi: paymentAPi,
-		bookApi:    bookApi,
+		storeApi:    storeApi,
+		paymentAPi:  paymentAPi,
+		bookApi:     bookApi,
+		deliveryApi: deliveryApi,
 	}
 }
 
+// SAGA create order
 func (s *SagaService) CreateOrder(ctx context.Context, order model.Order) model.StatusResponse {
 
 	logrus.Printf("Saga CreateOrder(): BEGIN order_id = %d", order.ID)
 
 	var response = model.StatusResponse{}
 
-	// place the order in store
+	// SAGA STEP 1: place the order in store
+	logrus.Printf("Saga CreateOrder(): SAGA STEP 1: place the order in store, order_id = %d", order.ID)
 	var storeOrderInfo = store.StoreOrderInfo{
 		OrderId:  order.ID,
 		BookId:   order.BookId,
@@ -53,7 +58,9 @@ func (s *SagaService) CreateOrder(ctx context.Context, order model.Order) model.
 		response.Reason = result.Reason
 		return response
 	}
-	// get the book price
+
+	// SAGA STEP 2: do payment
+	logrus.Printf("Saga CreateOrder(): SAGA STEP 2: do payment, order_id = %d", order.ID)
 	logrus.Printf("Saga CreateOrder(): Try to get book price, order_id = %d, book_id = %d", order.ID, order.BookId)
 	bookPrice, err := s.bookApi.GetBookPrice(ctx, order.BookId)
 	if err != nil {
@@ -104,6 +111,54 @@ func (s *SagaService) CreateOrder(ctx context.Context, order model.Order) model.
 
 	response.Status = result.Status
 	response.Reason = result.Reason
+
+	// SAGA STEP 3: do delivery
+	logrus.Printf("Saga CreateOrder(): SAGA STEP 3: do delivery, order_id = %d", order.ID)
+	result, err = s.deliveryApi.DoDelivery(ctx, delivery.DeliveryInfo{
+		OrderId:         order.ID,
+		UserId:          order.UserId,
+		DeliveryAddress: order.DeliveryAddress,
+		DeliveryDate:    order.DeliveryDate,
+	})
+
+	if err != nil {
+		logrus.Errorf("Saga CreateOrder(): Cannot do delivery for order_id = %d, error = %s", order.ID, err.Error())
+		response.Status = "failed"
+		response.Reason = err.Error()
+
+		// revert all saga steps
+		// revert STEP 2: cancel payment
+		logrus.Printf("Saga CreateOrder(): revert SAGA STEP 2: cancel payment, order_id = %d", order.ID)
+		if err = s.paymentAPi.CancelPayment(ctx, order.ID, "Delivery failed"); err != nil {
+			logrus.Errorf("Saga CreateOrder(): Cannot cancel payment, order_id = %d, error = %s", order.ID, err.Error())
+		}
+		// revert STEP 1: cancel order in store
+		logrus.Printf("Saga CreateOrder(): revert SAGA STEP 1: cancel order in store, order_id = %d", order.ID)
+		if err = s.storeApi.CancelOrderInStore(ctx, order.ID, "Delivery failed"); err != nil {
+			logrus.Errorf("Saga CreateOrder(): Cannot cancel order in store, order_id = %d, error = %s", order.ID, err.Error())
+		}
+		return response
+	}
+
+	response.Status = result.Status
+	response.Reason = result.Reason
+
+	if response.Status == "failed" {
+		logrus.Printf("Saga CreateOrder(): Delivery failed for order_id = %d, reason = %s", order.ID, response.Reason)
+
+		// revert all saga steps
+		// revert STEP 2: cancel payment
+		logrus.Printf("Saga CreateOrder(): revert SAGA STEP 2: cancel payment, order_id = %d", order.ID)
+		if err = s.paymentAPi.CancelPayment(ctx, order.ID, "Delivery failed"); err != nil {
+			logrus.Errorf("Saga CreateOrder(): Cannot cancel payment, order_id = %d, error = %s", order.ID, err.Error())
+		}
+		// revert STEP 1: cancel order in store
+		logrus.Printf("Saga CreateOrder(): revert SAGA STEP 1: cancel order in store, order_id = %d", order.ID)
+		if err = s.storeApi.CancelOrderInStore(ctx, order.ID, "Delivery failed"); err != nil {
+			logrus.Errorf("Saga CreateOrder(): Cannot cancel order in store, order_id = %d, error = %s", order.ID, err.Error())
+		}
+		return response
+	}
 
 	logrus.Printf("Saga CreateOrder(): END order_id = %d, status = %s, reason = %s", order.ID, response.Status, response.Reason)
 

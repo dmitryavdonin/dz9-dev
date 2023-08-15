@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: store-app-config
+data:
+  APP_PORT: "{{ .Values.store.port}}"
+  APP_SERVICE_NAME: "store_service"

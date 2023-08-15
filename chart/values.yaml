@@ -1,0 +1,144 @@
+book:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-book:latest
+user:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-user:latest
+delivery:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-delivery:latest
+store:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-store:latest
+payment:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-payment:latest
+order:
+  replicaCount: "1"
+  port: 8000
+  container:
+    image: dmitryavdonin/otus-dz9-order:latest
+
+bookdb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"
+
+userdb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"
+
+deliverydb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"
+
+storedb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"
+
+paymentdb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"
+
+orderdb:
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 15.2.0-debian-11-r16
+    digest: ""
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    debug: false
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "manager"
+    username: "postgres"
+    password: "manager"
+    database: "postgres"
+  architecture: standalone
+  containerPorts:
+    postgresql: "5432"

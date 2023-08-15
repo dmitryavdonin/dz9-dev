@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: arch.homework
+    http:
+      paths:
+      - path: /book
+        pathType: Prefix
+        backend:
+          service:
+            name: book-app
+            port: 
+              name: web
+      - path: /user
+        pathType: Prefix
+        backend:
+          service:
+            name: user-app
+            port: 
+              name: web
+      - path: /delivery
+        pathType: Prefix
+        backend:
+          service:
+            name: delivery-app
+            port: 
+              name: web
+      - path: /store
+        pathType: Prefix
+        backend:
+          service:
+            name: store-app
+            port: 
+              name: web
+      - path: /payment
+        pathType: Prefix
+        backend:
+          service:
+            name: payment-app
+            port: 
+              name: web
+      - path: /order
+        pathType: Prefix
+        backend:
+          service:
+            name: order-app
+            port: 
+              name: web

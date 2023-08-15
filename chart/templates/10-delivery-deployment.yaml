@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-app
+spec:
+  replicas: {{ .Values.delivery.replicaCount}}
+  selector:
+    matchLabels:
+      app: delivery-app
+  template:
+    metadata:
+      labels:
+        app: delivery-app
+    spec:
+      containers:
+      - name: delivery-app
+        image: {{ .Values.delivery.container.image}}
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: {{ .Values.delivery.port}}
+        envFrom:
+          - configMapRef:
+              name: delivery-app-config
+          - secretRef:
+              name: delivery-postgres-secret

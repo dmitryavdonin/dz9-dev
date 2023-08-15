@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-app
+  labels:
+    app: book-app
+spec:
+  selector:
+    app: book-app
+  ports:
+    - name: web
+      port: 80
+      targetPort: {{ .Values.book.port}}
+  type: ClusterIP

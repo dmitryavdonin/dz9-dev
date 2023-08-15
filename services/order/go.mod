@@ -72,5 +72,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.16.0
+	github.com/vrischmann/envconfig v1.3.0
 	gorm.io/driver/postgres v1.5.2
 )
